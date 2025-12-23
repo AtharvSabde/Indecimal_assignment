@@ -41,12 +41,6 @@ separators = ["\n\n", "\n", ".", " ", ""]  # Hierarchical priority
 4. **Superior retrieval accuracy** through semantically meaningful chunks
 5. **Flexible architecture** adapting to both structured (Markdown) and unstructured (TXT, PDF) formats
 
-**Example**: A document section `## Material Procurement Delays` with 1200 characters would be:
-1. Isolated at the header boundary (Stage 1)
-2. Subdivided into 3 chunks of ~500 chars with 50-char overlap (Stage 2)
-3. Each chunk retains metadata: `{"Header 2": "Material Procurement Delays"}`
-
-This approach ensures retrieved chunks are both **semantically meaningful** and **appropriately sized**, leading to better retrieval accuracy and more grounded answer generation.
 
 ### 2. Efficient Local Model with Strong Performance
 
@@ -96,6 +90,7 @@ The pipeline consists of four main components:
 - 1B parameters provide good instruction-following while maintaining fast inference
 - Strong adherence to system prompts for grounded generation
 - Temperature set to 0.15 to minimize hallucinations
+-  Selected for comparative study: Initially chosen for planned comparison with OpenRouter models (optional task)
 
 ### Vector Retrieval: FAISS
 
@@ -136,7 +131,7 @@ Place your documents in the project directory:
 
 ### 2. Run the Pipeline
 ```bash
-python rag_pipeline.py
+python main.py
 ```
 
 ### 3. Query the System
@@ -244,44 +239,15 @@ self.chunker = MarkdownHeaderChunker(
 This implementation demonstrates a solid foundation for production-grade RAG systems, but several enhancements could further improve performance and capabilities:
 
 ### Model Upgrades
-- **Advanced Embedding Models**: Experiment with more powerful embeddings like:
-  - `text-embedding-3-large` (OpenAI) for higher dimensional representations
-  - `e5-mistral-7b-instruct` for instruction-aware embeddings
-  - Domain-specific embeddings fine-tuned on construction/technical documents
+- **Advanced Embedding Models**: Experiment with more powerful embeddings 
   
 - **Larger Language Models**: Scale to more capable LLMs while maintaining efficiency:
-  - `gemma2:7b` or `llama3:8b` for improved reasoning and synthesis
-  - API-based models (GPT-4, Claude) for comparative benchmarking
-  - Fine-tuned models specifically trained on construction domain knowledge
 
 ### Retrieval Enhancements
-- **Hybrid Search**: Combine semantic search with keyword-based BM25 for better recall on specific terms and entity names
 - **Re-ranking Pipeline**: Implement cross-encoder models to re-rank retrieved chunks based on query-chunk relevance
 - **Query Expansion**: Automatically generate multiple query variations to improve retrieval coverage
 - **Contextual Chunk Retrieval**: Include surrounding chunks for better context window utilization
 
-### Architecture Improvements
-- **Adaptive Chunking**: Dynamically adjust chunk size based on document structure and content density
-- **Multi-hop Reasoning**: Enable iterative retrieval for complex queries requiring multiple document sections
-- **Source Citation Enhancement**: Add precise line/paragraph references in generated answers
-- **Confidence Scoring**: Implement uncertainty quantification to flag low-confidence responses
 
-### System Optimization
-- **Caching Strategy**: Implement query cache for frequently asked questions
-- **Batch Processing**: Optimize for bulk document ingestion and updates
-- **Incremental Updates**: Support adding new documents without full re-indexing
-- **Performance Monitoring**: Add metrics for retrieval quality, latency, and token usage
-
-### Evaluation Framework
-- **Automated Testing Suite**: Expand to 50+ test queries across diverse topics
-- **Human Evaluation**: Collect user feedback on answer quality and relevance
-- **A/B Testing**: Compare different chunking strategies, models, and retrieval approaches
-- **Hallucination Detection**: Implement automated fact-checking against source documents
-
-### Production Readiness
-- **API Endpoint**: Wrap system in FastAPI/Flask for service deployment
-- **Logging & Monitoring**: Add structured logging and observability metrics
-- **Error Handling**: Robust fallback mechanisms for edge cases
-- **Scalability**: Transition to production vector databases (Pinecone, Weaviate, Qdrant) for larger document corpora
 
 These enhancements would transform the current prototype into an enterprise-grade RAG system capable of handling complex construction marketplace queries at scale while maintaining the core principles of grounded generation and transparency.
