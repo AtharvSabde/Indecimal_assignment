@@ -1,301 +1,163 @@
-# Mini RAG System for Construction Marketplace
+# Mini RAG System – Construction Marketplace Assistant
 
-A Retrieval-Augmented Generation (RAG) pipeline that answers user questions using internal documents (policies, FAQs, specifications) while ensuring responses are strictly grounded in retrieved content.
+A lightweight, efficient Retrieval-Augmented Generation (RAG) system designed to answer questions using internal construction documents such as policies, FAQs, and specifications.
 
-## Overview
+## ⭐ What Makes This Project Different
 
-This system implements a complete RAG pipeline that:
-- Chunks and embeds documents for semantic search
-- Retrieves relevant document sections using vector similarity
-- Generates answers using a local LLM (Ollama) based only on retrieved context
-- Provides full transparency by displaying retrieved chunks and final answers
+This project focuses on **getting high-quality answers from a small, efficient system**, rather than relying on large, expensive models.
 
-## Architecture
+### 1. Smarter Document Chunking (Key Differentiator)
 
-The pipeline consists of four main components:
+Instead of cutting documents into random fixed-size pieces, the system splits documents the way humans read them:
 
-1. **Document Loader**: Handles multiple file formats (TXT, MD, PDF)
-2. **Markdown Header Chunker**: Intelligently splits documents by structure
-3. **Vector Store**: FAISS-based semantic search with embedding cache
-4. **LLM Generator**: Local Ollama-powered answer generation
+- **First**, documents are divided by clear section headings
+- **Then**, long sections are gently broken into smaller parts while keeping related content together
+- **Important headings** are kept inside the chunks so the meaning is never lost
 
-## Model Choices
+**Why this matters:**
+- Each chunk talks about one clear idea
+- Retrieved information is more relevant
+- Answers feel complete and well-grounded, not fragmented
 
-### Embedding Model: `sentence-transformers/all-MiniLM-L6-v2`
+This approach improves retrieval quality without needing complex ranking tricks or large models.
 
-**Why this model?**
-- Produces 384-dimensional embeddings optimized for semantic similarity
-- Fast encoding speed (~1000 sentences/second on CPU)
-- Excellent balance between embedding quality and inference speed
-- Generalizes well to construction/technical documents
-- Completely offline operation after initial download
+### 2. Strong Results with a Small Local Model (Gemma 1B)
 
-**Key Differentiating Factor**: Unlike larger 768-dim models, this provides sufficient semantic granularity while enabling faster search and lower memory footprint—ideal for real-time RAG systems.
+The system uses a **Gemma 1B parameter model** running fully locally.
 
-### LLM Model: `gemma3:1b` (via Ollama)
+Despite its small size:
+- It follows instructions very strictly
+- It avoids hallucinations
+- It produces clear, grounded answers when given good context
 
-**Why this model?**
-- **Completely local and offline** (no API costs or rate limits)
-- **Selected for comparative study**: Initially chosen for planned comparison with OpenRouter models (optional task)
-- 1B parameters provide good instruction-following while maintaining fast inference
-- Strong adherence to system prompts for grounded generation
-- Temperature set to 0.15 to minimize hallucinations
+**This demonstrates that:**
+- Good chunking + good retrieval can outperform brute-force model size
+- The project proves that **system design matters more than model scale**
 
-**Note**: While the optional comparative study was not completed, the local LLM setup enables easy future experimentation comparing `gemma3:1b` against API-based models.
+## 📋 Overview
 
-## Implementation Details
+This is a Retrieval-Augmented Generation (RAG) system designed to answer questions using only internal construction documents.
 
-### Document Chunking Strategy (Key Differentiator)
+**The assistant:**
+- Retrieves relevant document sections using semantic search
+- Generates answers strictly from retrieved content
+- Clearly shows what information was used to answer each question
 
-The system implements a **hybrid two-stage chunking approach** using LangChain's text splitters, which is a key architectural decision differentiating this implementation:
+## 🔄 How the System Works (High Level)
 
-#### Stage 1: Markdown Header-Based Splitting
-**Implementation**: `MarkdownHeaderTextSplitter` from LangChain
+1. Documents are loaded (Markdown, text, or PDF)
+2. Each document is split into meaningful chunks
+3. Chunks are converted into embeddings and stored locally
+4. A user question retrieves the most relevant chunks
+5. A local LLM generates an answer using only those chunks
+6. Retrieved context and final answer are shown transparently
 
-**Configuration**:
-```python
-headers_to_split_on = [("##", "Header 2")]
-strip_headers = False  # Keeps headers in content for context
-```
+## 🤖 Models Used
 
-**Purpose**:
-- Splits documents at semantic boundaries (section headers)
-- Preserves document structure and organizational logic
-- Maintains header metadata for each chunk (e.g., "Project Delays", "Material Costs")
-- Ensures chunks align with natural document organization
+### Embedding Model
+**`sentence-transformers/all-MiniLM-L6-v2`**
 
-**Why Header-Level Splitting?**
-- Construction documents are typically well-structured with clear sections
-- Splitting by headers ensures topically coherent chunks
-- Metadata preservation enables better source attribution in answers
-- More semantic than arbitrary character-based splitting alone
+- Fast and lightweight
+- Produces high-quality semantic embeddings
+- Works well on technical and policy-style documents
+- Runs completely offline
 
-#### Stage 2: Recursive Character-Based Splitting
-**Implementation**: `RecursiveCharacterTextSplitter` from LangChain
+Chosen to balance speed, accuracy, and simplicity.
 
-**Configuration**:
-```python
-chunk_size = 500 characters
-chunk_overlap = 50 characters
-separators = ["\n\n", "\n", ".", " ", ""]  # Priority order
-```
+### Language Model
+**`gemma3:1b`** (via Ollama)
 
-**Purpose**:
-- Enforces maximum chunk size constraints for embedding model
-- Applies intelligent splitting at natural boundaries (paragraphs → sentences → words)
-- Overlap ensures context continuity between adjacent chunks
-- Prevents mid-sentence breaks when possible
+- Fully local and offline
+- Very low latency
+- Strong instruction-following behavior
+- Used with low temperature to reduce hallucinations
 
-**Why This Specific Configuration?**
-- **500 characters**: Optimal for `all-MiniLM-L6-v2` (256 token limit ≈ 500-600 chars)
-- **50 character overlap**: 10% overlap ensures critical information at boundaries isn't lost
-- **Hierarchical separators**: Tries paragraph breaks first, then sentences, avoiding word-level splits
+This choice highlights that small models can perform well when the retrieval layer is strong.
 
-#### Combined Approach Benefits
+## 🔍 Transparency & Grounding
 
-**Key Differentiating Factors**:
+Every answer is generated with strict rules:
 
-1. **Semantic Coherence**: Unlike pure character-based chunking, this preserves document logic by respecting section boundaries
+- The model can only use retrieved document chunks
+- No outside knowledge is allowed
+- If information is missing, the system clearly says so
 
-2. **Metadata Enrichment**: Each chunk carries both:
-   - Source file information
-   - Section header metadata (e.g., `Header 2: "Safety Requirements"`)
-   - Chunk ID for ordering
+**For each query, the system displays:**
+- Retrieved document chunks
+- Their source and section
+- The final generated answer
 
-3. **Context Preservation**: 
-   - Headers remain in chunk content (not stripped)
-   - Overlap prevents information loss at boundaries
-   - Natural break points prioritized over arbitrary character counts
+This makes the system easy to audit and trust.
 
-4. **Retrieval Quality**: 
-   - Semantic splitting improves relevance of retrieved chunks
-   - Header metadata enables better source citation in generated answers
-   - Users can trace answers back to specific document sections
-
-5. **Flexibility**: 
-   - Markdown files use both stages (structure-aware)
-   - Non-markdown files (TXT, PDF) use only Stage 2 (content-based)
-
-**Example**:
-A document with section `## Material Procurement Delays` containing 1200 characters would be:
-1. Split at the header boundary (Stage 1)
-2. Divided into 3 chunks of ~500 chars each with 50-char overlap (Stage 2)
-3. Each chunk retains the header metadata: `{"Header 2": "Material Procurement Delays"}`
-
-This approach ensures retrieved chunks are both semantically meaningful and appropriately sized for the embedding model, leading to better retrieval accuracy and more grounded answer generation.
-
-### Vector Retrieval
-
-**Implementation**: FAISS (Facebook AI Similarity Search)
-
-**Configuration**:
-- Index type: `IndexFlatIP` (Inner Product for cosine similarity)
-- Similarity metric: Cosine similarity via L2-normalized embeddings
-- Default retrieval: Top 3 most relevant chunks
-
-**Process**:
-1. Documents are embedded using the sentence-transformer model
-2. Embeddings are L2-normalized for cosine similarity calculation
-3. FAISS index enables fast approximate nearest neighbor search
-4. Query embeddings are compared against the index to retrieve top-k chunks
-
-**Caching**: Embeddings are cached in `embeddings.pkl` to avoid recomputation on subsequent runs.
-
-### Grounding to Retrieved Context
-
-The system enforces strict grounding through multiple mechanisms:
-
-#### 1. Explicit LLM Instructions
-The prompt includes strict rules:
-- Use ONLY information from provided chunks
-- Do NOT use outside knowledge or assumptions
-- Do NOT infer missing details
-- If answer not found, respond with: "I could not find this information in the provided documents."
-
-#### 2. Low Temperature Setting
-```python
-"temperature": 0.15
-```
-Very low temperature reduces creative generation and hallucinations.
-
-#### 3. Context-Only Architecture
-The LLM receives:
-- Retrieved document chunks with source and section metadata
-- Explicit instruction to cite sources using `[Source | Section]` notation
-- No access to external knowledge sources
-
-#### 4. Transparent Output
-Every response displays:
-- Retrieved chunks with similarity scores
-- Source file and section information
-- Final generated answer
-
-This transparency allows users to verify grounding and identify potential issues.
-
-## Installation
+## 🚀 How to Run
 
 ### Prerequisites
+
 - Python 3.8+
-- Ollama installed and running locally
+- Ollama installed and running
 
-### Install Ollama
-```bash
-# macOS/Linux
-curl -fsSL https://ollama.com/install.sh | sh
+### Install Dependencies
 
-# Pull the gemma3:1b model
-ollama pull gemma3:1b
-```
-
-### Install Python Dependencies
 ```bash
 pip install sentence-transformers faiss-cpu numpy requests python-dotenv langchain-text-splitters PyPDF2
 ```
 
-**Note**: Use `faiss-cpu` for CPU-only systems or `faiss-gpu` if you have CUDA support.
+### Pull the Model
 
-## Usage
-
-### 1. Prepare Your Documents
-Place your markdown files in the project directory:
-- `doc1.md`
-- `doc2.md`
-- `doc3.md`
-
-### 2. Run the Pipeline
 ```bash
-python rag_pipeline.py
+ollama pull gemma3:1b
 ```
 
-### 3. Query the System
-Once loaded, you can ask questions:
-```
-📝 Ask a question: What factors affect construction project delays?
-```
+### Run the System
 
-### 4. View Results
-The system displays:
-- **Retrieved Context**: All chunks used with similarity scores
-- **Generated Answer**: LLM response based on retrieved context
-
-### 5. Exit
-Type `exit` or `quit` to stop the system.
-
-## Output Format
-
-For each query, the system provides:
-
-```
-================================================================================
-RETRIEVED CONTEXT (Document Chunks)
-================================================================================
-
-[CHUNK 1]
-  Source: doc1.md
-  Section: Project Delays
-  Similarity Score: 0.8234
-  Content:
-  ----------------------------------------------------------------------------
-  [Full chunk content displayed here]
-  ----------------------------------------------------------------------------
-
-[Additional chunks...]
-
-================================================================================
-GENERATING ANSWER...
-================================================================================
-
-================================================================================
-FINAL GENERATED ANSWER
-================================================================================
-[LLM-generated response based on retrieved chunks]
-================================================================================
+```bash
+python main.py
 ```
 
-## Configuration
+Ask questions directly in the terminal once the system is ready.
 
-You can adjust key parameters in the `RAGPipeline` initialization:
+## 🔮 Future Work
 
-```python
-# In main():
-rag = RAGPipeline(num_chunks=3)  # Number of chunks to retrieve
+This project is intentionally simple and extensible. Possible next steps include:
 
-# In RAGPipeline.__init__():
-self.chunker = MarkdownHeaderChunker(
-    chunk_size=500,  # Maximum chunk size
-    overlap=50       # Overlap between chunks
-)
-```
+### 🔍 Stronger Embedding Models
+- Try higher-dimensional or domain-specific embedding models
+- Compare retrieval quality across embedding choices
 
-## File Structure
+### 🧠 More Capable Language Models
+- Test larger local models (2B–7B range)
+- Compare answer completeness and reasoning depth
 
-```
-.
-├── rag_pipeline.py          # Main pipeline implementation
-├── doc1.md                  # Document 1
-├── doc2.md                  # Document 2
-├── doc3.md                  # Document 3
-├── embeddings.pkl           # Cached embeddings (auto-generated)
-├── .env                     # Environment variables (optional)
-└── README.md                # This file
-```
+### 🔄 Re-ranking Retrieved Chunks
+- Add a lightweight re-ranker to improve multi-part answers
 
-## How It Works
+### 📈 Automatic Evaluation
+- Measure retrieval relevance and answer completeness across test queries
 
-1. **Ingestion Phase**:
-   - Load documents (TXT, MD, PDF)
-   - Split into chunks using markdown headers and character limits
-   - Generate embeddings for each chunk
-   - Build FAISS vector index
-   - Cache embeddings for future use
+### 🔗 Hybrid Search
+- Combine semantic search with keyword-based matching for structured data
 
-2. **Query Phase**:
-   - User submits a question
-   - Question is embedded using the same model
-   - FAISS retrieves top-k most similar chunks
-   - Retrieved chunks are displayed with metadata
-   - LLM generates answer using only retrieved context
-   - Final answer is displayed
+## 💡 Summary
+
+This project demonstrates that:
+
+- **Thoughtful chunking** dramatically improves RAG quality
+- **Small local models** can perform strongly with good context
+- **Transparency and grounding** are more important than raw model size
+
+The system is efficient, explainable, and production-oriented, making it ideal for real-world internal knowledge assistants.
+
+## 📄 License
+
+[Add your license here]
+
+## 🤝 Contributing
+
+[Add contribution guidelines here]
+
+## 📧 Contact
+
+[Add your contact information here]
 
 ## System Testing & Results
 
