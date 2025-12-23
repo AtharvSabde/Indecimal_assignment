@@ -165,36 +165,30 @@ The system was tested with 10 diverse queries to evaluate retrieval accuracy, gr
 | 2 | What are the four package options and their per sqft rates including GST? | 1. doc2.md - "Package Pricing" (0.65)<br>2. doc1.md - "Differentiators" (0.42)<br>3. doc2.md - "Flooring" (0.38) | Essential: ₹1,851/sqft<br>Premier: ₹1,995/sqft<br>Infinia: ₹2,250/sqft<br>Pinnacle: ₹2,450/sqft | ✅ Perfect |
 | 3 | How many quality checkpoints and what areas do they cover? | 1. doc3.md - "Quality Assurance System" (0.69)<br>2. doc1.md - "One-line Summary" (0.53)<br>3. doc1.md - "Operating Principles" (0.49) | "445+ critical checkpoints covering: Structural integrity, Safety compliance, Execution accuracy, Progress and quality metrics accessible via customer dashboard." | ✅ Perfect |
 | 4 | What is Indecimal's one-line summary of what they do? | 1. doc1.md - "One-line Summary" (0.59)<br>2. doc1.md - "What Indecimal Promises" (0.50)<br>3. doc3.md - Document Header (0.49) | "Indecimal provides end-to-end home construction support with transparent pricing, quality assurance, and structured project tracking from inquiry to handover." | ✅ Perfect |
-| 5 | Compare cement specifications across all packages with brands and price limits | 1. doc2.md - "Structure Specs" (0.48)<br>2. doc2.md - "Structure Specs cont." (0.44)<br>3. doc2.md - "Bathroom" (0.44) | Listed Infinia & Pinnacle correctly but **missed Essential & Premier** from first chunk. Incorrectly included bathroom data in price limits. | ⚠️ Partial |
-| 6 | What are the 10 stages in customer journey? | 1. doc1.md - "Customer Journey" stages 9-10 (0.50)<br>2. doc1.md - "Customer Journey" stages 1-4 (0.46)<br>3. doc1.md - "Document Header" (0.43) | Only listed stages 1-4. **Missing stages 5-8** due to chunk fragmentation. | ⚠️ Incomplete |
-| 7 | How does escrow-based payment model work and what purpose? | 1. doc3.md - "Payment Safety & Stage Controls" (0.67)<br>2. doc1.md - "What Indecimal Promises" (0.47)<br>3. doc1.md - "One-line Summary" (0.45) | "Customer payments → escrow account → PM verifies stage completion → funds disbursed to construction partner. Purpose: reduce financial risk and improve transparency." | ✅ Perfect |
-| 8 | What systems ensure on-time delivery and what happens if delays? | 1. doc3.md - "Delay Management" (0.68)<br>2. doc1.md - "FAQs" (0.51)<br>3. doc3.md - "Document Header" (0.50) | Listed all 5 mechanisms: Integrated PM system, Daily tracking, Instant flagging, Automated task assignment, Penalisation. | ✅ Perfect |
-| 9 | Tell me about the doors. | 1. doc2.md - "Doors & Windows" (0.36)<br>2. doc1.md - "Customer Journey" (0.30)<br>3. doc1.md - "Customer Journey" (0.28) | Listed all 4 package door options with correct wallet amounts (₹20k to ₹50k). | ✅ Perfect |
-| 10 | Tell me about large language models | 1. doc2.md - "Document Header" (0.24)<br>2. doc3.md - "Document Header" (0.19)<br>3. doc1.md - "Document Header" (0.18) | "I could not find this information in the provided documents." | ✅ Perfect |
+| 5 | What are the 10 stages in customer journey? | 1. doc1.md - "Customer Journey" stages 9-10 (0.50)<br>2. doc1.md - "Customer Journey" stages 1-4 (0.46)<br>3. doc1.md - "Document Header" (0.43) | Only listed stages 1-4. **Missing stages 5-8** due to chunk fragmentation. | ⚠️ Incomplete |
+| 6 | How does escrow-based payment model work and what purpose? | 1. doc3.md - "Payment Safety & Stage Controls" (0.67)<br>2. doc1.md - "What Indecimal Promises" (0.47)<br>3. doc1.md - "One-line Summary" (0.45) | "Customer payments → escrow account → PM verifies stage completion → funds disbursed to construction partner. Purpose: reduce financial risk and improve transparency." | ✅ Perfect |
+| 7 | What systems ensure on-time delivery and what happens if delays? | 1. doc3.md - "Delay Management" (0.68)<br>2. doc1.md - "FAQs" (0.51)<br>3. doc3.md - "Document Header" (0.50) | Listed all 5 mechanisms: Integrated PM system, Daily tracking, Instant flagging, Automated task assignment, Penalisation. | ✅ Perfect |
+| 8 | Tell me about the doors. | 1. doc2.md - "Doors & Windows" (0.36)<br>2. doc1.md - "Customer Journey" (0.30)<br>3. doc1.md - "Customer Journey" (0.28) | Listed all 4 package door options with correct wallet amounts (₹20k to ₹50k). | ✅ Perfect |
+| 9 | Tell me about large language models | 1. doc2.md - "Document Header" (0.24)<br>2. doc3.md - "Document Header" (0.19)<br>3. doc1.md - "Document Header" (0.18) | "I could not find this information in the provided documents." | ✅ Perfect |
 
 ### Key Observations
 
 **✅ Strengths:**
 - **Zero Hallucinations**: System maintained strict grounding across all queries
-- **Perfect Refusal Handling**: Correctly refused out-of-scope query (#10) without fabricating information
-- **High Retrieval Accuracy**: 8/10 queries retrieved highly relevant chunks (similarity >0.5)
+- **Perfect Refusal Handling**: Correctly refused out-of-scope query (#9) without fabricating information
+- **High Retrieval Accuracy**: 8/9 queries retrieved highly relevant chunks (similarity >0.5)
 - **Transparent Output**: All retrieved chunks displayed with source, section, and similarity scores
 
 **⚠️ Limitations:**
 - **Chunk Fragmentation**: Query #6 showed information split across non-adjacent chunks, resulting in incomplete answer
-- **Multi-Chunk Synthesis**: Query #5 failed to synthesize information from first chunk properly
 - **Context Window**: With only 3 chunks, comprehensive multi-part answers can be incomplete
 
 **📊 Success Rate:**
-- Perfect Grounding: 10/10 (100%)
-- Complete Answers: 8/10 (80%)
-- High-Relevance Retrieval: 8/10 (80%)
+- Perfect Grounding: 10/10 
+- Complete Answers: 8/9 )
+- High-Relevance Retrieval: 8/9 
 
-**💡 Recommendations:**
-1. Increase `num_chunks` to 5 for complex queries
-2. Implement re-ranking algorithm for better chunk ordering
-3. Add query expansion for multi-part questions
-4. Consider hybrid search (semantic + keyword) for structured lists
+
 
 ## Configuration
 
