@@ -175,11 +175,11 @@ The system was tested with 10 diverse queries to evaluate retrieval accuracy, gr
 - **Transparent Output**: All retrieved chunks displayed with source, section, and similarity scores
 
 **⚠️ Limitations:**
-- **Chunk Fragmentation**: Query #6 showed information split across non-adjacent chunks, resulting in incomplete answer
+- **Chunk Fragmentation**: Query #5 showed information split across non-adjacent chunks, resulting in incomplete answer
 - **Context Window**: With only 3 chunks, comprehensive multi-part answers can be incomplete
 
 **📊 Success Rate:**
-- Perfect Grounding: 10/10 
+- Perfect Grounding: 9/9
 - Complete Answers: 8/9 )
 - High-Relevance Retrieval: 8/9 
 
