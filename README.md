@@ -150,7 +150,7 @@ Type `exit` or `quit` to stop the system.
 
 ## System Testing & Results
 
-The system was tested with 10 diverse queries to evaluate retrieval accuracy, grounding, and answer quality.
+The system was tested with 9 diverse queries to evaluate retrieval accuracy, grounding, and answer quality.
 
 ### Test Query Results
 
